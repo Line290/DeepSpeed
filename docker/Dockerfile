@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.0-devel-ubuntu18.04
+FROM nvidia/cuda:10.2-devel-ubuntu18.04
 
 ##############################################################################
 # Temporary Installation Directory
@@ -156,12 +156,13 @@ RUN cat /etc/ssh/sshd_config > ${STAGE_DIR}/sshd_config && \
 ##############################################################################
 # PyTorch
 ##############################################################################
-ENV PYTORCH_VERSION=1.2.0
-ENV TORCHVISION_VERSION=0.4.0
+ENV PYTORCH_VERSION=1.5.0
+ENV TORCHVISION_VERSION=0.6.0
 ENV TENSORBOARDX_VERSION=1.8
 RUN pip install torch==${PYTORCH_VERSION}
 RUN pip install torchvision==${TORCHVISION_VERSION}
 RUN pip install tensorboardX==${TENSORBOARDX_VERSION}
+RUN pip install cpufeature
 
 ##############################################################################
 # PyYAML build issue
@@ -188,6 +189,6 @@ RUN git clone https://github.com/microsoft/DeepSpeed.git ${STAGE_DIR}/DeepSpeed
 RUN cd ${STAGE_DIR}/DeepSpeed && \
     git checkout . && \
     git checkout master && \
-    ./install.sh --pip_sudo
+    DS_BUILD_CPU_ADAM=1 DS_BUILD_SPARSE_ATTN=1 ./install.sh --pip_sudo
 RUN rm -rf ${STAGE_DIR}/DeepSpeed
 RUN python -c "import deepspeed; print(deepspeed.__version__)"
